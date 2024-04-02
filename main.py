@@ -3,6 +3,7 @@ from flask import Flask, render_template, jsonify, request
 import sqlite3
 import psutil
 import datetime
+import pytz
 import smtplib
 from email.mime.text import MIMEText
 app = Flask(__name__)
@@ -16,7 +17,7 @@ def home():
 
 @app.route('/save_thresholds', methods=['POST'])
 def save_thresholds():
-    global temperature_critical, cpu_critical, memory_critical
+    global temperature_critical, cpu_critical, memory_pytzcritical
     temperature_critical = int(request.form['temperature_critical'])
     cpu_critical = int(request.form['cpu_critical'])
     memory_critical = int(request.form['memory_critical'])
@@ -33,7 +34,8 @@ def get_data():
     interval = request.args.get('interval', '1m')
     
     # Определение временного интервала, основываясь на выбранном значении
-    current_time = datetime.datetime.now()
+    moscow_tz = pytz.timezone('Europe/Moscow')
+    current_time = datetime.datetime.now(moscow_tz)
     if interval == '1m':
         start_time = current_time - datetime.timedelta(minutes=1)
     elif interval == '1h':
@@ -80,7 +82,8 @@ def get_server_stats():
     return cpu_load, cpu_temperature, memory_usage
 def save_server_stats():
     cpu_load, cpu_temperature, memory_usage = get_server_stats()
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    moscow_tz = pytz.timezone('Europe/Moscow')
+    timestamp = datetime.datetime.now(moscow_tz).strftime("%Y-%m-%d %H:%M:%S")
     conn = sqlite3.connect("server_data.db")
     cursor = conn.cursor()
     cursor.execute("INSERT INTO server_data VALUES (?, ?, ?, ?)", (timestamp, cpu_temperature, cpu_load, memory_usage))
@@ -128,7 +131,6 @@ def setup():
     conn.close()
     save_server_stats()  # Сохранение данных перед каждым запросом
     # Получение актуальных значений из формы
-    print("аааа")
     check_thresholds(cpu_critical, temperature_critical, memory_critical)
 
 if __name__ == "__main__":
