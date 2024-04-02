@@ -107,12 +107,15 @@ def send_email(subject, message):
 def check_thresholds(cpu_critical, temperature_critical, memory_critical):
     cpu_load, cpu_temperature, memory_usage = get_server_stats()
     # Здесь можно задать критические значения и отправлять уведомления при их превышении
-    if cpu_load > cpu_critical:
-        send_email("CPU Load Alert", f"CPU load is high: {cpu_load}%")
-    if cpu_temperature > temperature_critical:
-        send_email("CPU Temperature Alert", f"CPU temperature is high: {cpu_temperature}°C")
-    if memory_usage > memory_critical:
-        send_email("Memory Usage Alert", f"Memory usage is high: {memory_usage}%")
+    try:
+        if cpu_load > cpu_critical:
+            send_email("CPU Load Alert", f"CPU load is high: {cpu_load}%")
+        if cpu_temperature > temperature_critical:
+            send_email("CPU Temperature Alert", f"CPU temperature is high: {cpu_temperature}°C")
+        if memory_usage > memory_critical:
+            send_email("Memory Usage Alert", f"Memory usage is high: {memory_usage}%")
+    except:
+        print("Ошибка: Письмо не отправлено")
 
 @app.before_request
 def setup():
