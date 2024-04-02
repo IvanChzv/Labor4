@@ -7,7 +7,7 @@ import pytz
 import smtplib
 from email.mime.text import MIMEText
 app = Flask(__name__)
-# Критические значения по умолчанию
+
 temperature_critical = 80
 cpu_critical = 90
 memory_critical = 90
@@ -30,10 +30,9 @@ def get_data():
     conn = sqlite3.connect("server_data.db")
     cursor = conn.cursor()
     
-    # Получение параметра interval из запроса
+
     interval = request.args.get('interval', '1m')
-    
-    # Определение временного интервала, основываясь на выбранном значении
+
     moscow_tz = pytz.timezone('Europe/Moscow')
     current_time = datetime.datetime.now(moscow_tz)
     if interval == '1m':
@@ -91,31 +90,27 @@ def save_server_stats():
     conn.close()
 def send_email(subject, message):
     print("Письмо отправлено")
-    # Замените значения настройками вашей электронной почты
-    sender_email = "chazov.vanya2018@yandex.ru"
-    sender_password = "Ivan2002"
-    receiver_email = "vanya.chazov@internet.ru"
+
+    sender_email = "nic-gamster@yandex.ru"
+    sender_password = "fuvqdbqzvmunqljg"
+    receiver_email = "chazov.vanya2018@yandex.ru"
     msg = MIMEText(message)
     msg["Subject"] = subject
     msg["From"] = sender_email
     msg["To"] = receiver_email
-    with smtplib.SMTP("smtp.mail.ru", 587) as server:
+    with smtplib.SMTP("smtp.yandex.ru", 587) as server:
         server.starttls()
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
 
 def check_thresholds(cpu_critical, temperature_critical, memory_critical):
     cpu_load, cpu_temperature, memory_usage = get_server_stats()
-    # Здесь можно задать критические значения и отправлять уведомления при их превышении
-    try:
-        if cpu_load > cpu_critical:
-            send_email("CPU Load Alert", f"CPU load is high: {cpu_load}%")
-        if cpu_temperature > temperature_critical:
-            send_email("CPU Temperature Alert", f"CPU temperature is high: {cpu_temperature}°C")
-        if memory_usage > memory_critical:
-            send_email("Memory Usage Alert", f"Memory usage is high: {memory_usage}%")
-    except:
-        print("Ошибка: Письмо не отправлено")
+    if cpu_load > cpu_critical:
+        send_email("CPU Load Alert", f"CPU load is high: {cpu_load}%")
+    if cpu_temperature > temperature_critical:
+        send_email("CPU Temperature Alert", f"CPU temperature is high: {cpu_temperature}°C")
+    if memory_usage > memory_critical:
+        send_email("Memory Usage Alert", f"Memory usage is high: {memory_usage}%")
 
 @app.before_request
 def setup():
@@ -132,8 +127,8 @@ def setup():
     """)
     conn.commit()
     conn.close()
-    save_server_stats()  # Сохранение данных перед каждым запросом
-    # Получение актуальных значений из формы
+    save_server_stats() 
+
     check_thresholds(cpu_critical, temperature_critical, memory_critical)
 
 if __name__ == "__main__":
