@@ -92,8 +92,8 @@ def save_server_stats():
 def send_email(subject, message):
     print("Письмо отправлено")
     # Замените значения настройками вашей электронной почты
-    sender_email = "vanya.chazov@internet.ru"
-    sender_password = "G0eCSUFmrbBAVKKSu4iR"
+    sender_email = "ivan.cha.01@mail.ru"
+    sender_password = "KA7ReTJhVipKjUu7yUGJ"
     receiver_email = "chazov.vanya2018@yandex.ru"
     msg = MIMEText(message)
     msg["Subject"] = subject
