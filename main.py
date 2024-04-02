@@ -93,7 +93,7 @@ def send_email(subject, message):
     print("Письмо отправлено")
     # Замените значения настройками вашей электронной почты
     sender_email = "vanya.chazov@internet.ru"
-    sender_password = "Tjy5mH9sJDmgg2npf16U"
+    sender_password = "5P81G4bv4QhwWmpwawc3"
     receiver_email = "chazov.vanya2018@yandex.ru"
     msg = MIMEText(message)
     msg["Subject"] = subject
