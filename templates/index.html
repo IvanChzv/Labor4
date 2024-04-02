@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Server Monitor</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Server Monitor</h1>
+    
+    <h2>Температура</h2>
+    <div id="temperature-chart"></div>
+    
+    <h2>Нагрузка на CPU</h2>
+    <div id="cpu-chart"></div>
+    
+    <h2>Нагрузка на оперативную память</h2>
+    <div id="memory-chart"></div>
+    
+    <div>
+        <label for="interval-select">Выберите интервал:</label>
+        <select id="interval-select">
+            <option value="1m">1 минута</option>
+            <option value="1h">1 час</option>
+            <option value="1d">1 день</option>
+            <option value="1w">1 неделя</option>
+        </select>
+    </div>
+    
+    <h2>Текущие критические значения</h2>
+    <ul>
+        <li>Критическая температура: {{ temperature_critical }}°C</li>
+        <li>Критическая нагрузка на CPU: {{ cpu_critical }}%</li>
+        <li>Критическая нагрузка на оперативную память: {{ memory_critical }}%</li>
+    </ul>
+    
+    <h2>Изменение критических значений</h2>
+    <form action="/save_thresholds" method="post">
+        <div>
+            <label for="temperature-critical-input">Критическая температура:</label>
+            <input type="number" id="temperature-critical-input" name="temperature_critical" value="{{ temperature_critical }}">
+        </div>
+        
+        <div>
+            <label for="cpu-critical-input">Критическая нагрузка на CPU:</label>
+            <input type="number" id="cpu-critical-input" name="cpu_critical" value="{{ cpu_critical }}">
+        </div>
+        
+        <div>
+            <label for="memory-critical-input">Критическая нагрузка на оперативную память:</label>
+            <input type="number" id="memory-critical-input" name="memory_critical" value="{{ memory_critical }}">
+        </div>
+        
+        <div>
+            <button type="submit">Сохранить</button>
+        </div>
+    </form>
+    
+    <script>
+        // Функция для получения данных от сервера с учетом выбранного интервала
+        function getData(interval) {
+            fetch(`/data?interval=${interval}`)
+                .then(response => response.json())
+                .then(data => {
+                    const timestamps = data.data.map(entry => entry[0]);
+                    const temperatures = data.data.map(entry => entry[1]);
+                    const cpuLoads = data.data.map(entry => entry[2]);
+                    const memoryUsages = data.data.map(entry => entry[3]);
+                    // График для температуры
+                    const temperatureChart = document.getElementById('temperature-chart');
+                    const temperatureData = [
+                    {
+                        x: timestamps,
+                        y: temperatures,
+                        name: 'Температура',
+                        type: 'scatter',
+                        fill: 'tozeroy',
+                        marker: { color: 'red' },
+                    },
+                    ];
+                    const temperatureLayout = { title: 'Температура', yaxis: { range: [0, 100] } };
+                    Plotly.newPlot(temperatureChart, temperatureData, temperatureLayout);
+                    // График для нагрузки на CPU
+                    const cpuChart = document.getElementById('cpu-chart');
+                    const cpuData = [
+                    {
+                        x: timestamps,
+                        y: cpuLoads,
+                        name: 'Нагрузка на CPU',
+                        type: 'scatter',
+                        fill: 'tozeroy',
+                        marker: { color: 'green' },
+                    },
+                    ];
+                    const cpuLayout = { title: 'Нагрузка на CPU', yaxis: { range: [0, 100] } };
+                    Plotly.newPlot(cpuChart, cpuData, cpuLayout);
+                    // График для нагрузки на оперативную память
+                    const memoryChart = document.getElementById('memory-chart');
+                    const memoryData = [
+                    {
+                        x: timestamps,
+                        y: memoryUsages,
+                        name: 'Нагрузка на оперативную память',
+                        type: 'scatter',
+                        fill: 'tozeroy',
+                        marker: { color: 'blue' },
+                    },
+                    ];
+                    const memoryLayout = { title: 'Нагрузка на оперативную память', yaxis: { range: [0, 100] } };
+                    Plotly.newPlot(memoryChart, memoryData, memoryLayout);
+                });
+        }
+        
+        // Получение данных при загрузке страницы с интервалом по умолчанию
+        const intervalSelect = document.getElementById('interval-select');
+        const defaultInterval = intervalSelect.value;
+        getData(defaultInterval);
+        
+        // Обновление данных при изменении выбранного интервала
+        intervalSelect.addEventListener('change', function() {
+            const selectedInterval = intervalSelect.value;
+            getData(selectedInterval);
+        });
+        
+        // Обновление данных каждые 5 секунд
+        setInterval(function() {
+            const selectedInterval = intervalSelect.value;
+            getData(selectedInterval);
+        }, 5000);
+        
+        // Обработка введенных критических параметров системы
+        const temperatureCriticalInput = document.getElementById('temperature-critical-input');
+        const cpuCriticalInput = document.getElementById('cpu-critical-input');
+        const memoryCriticalInput = document.getElementById('memory-critical-input');
+        
+        temperatureCriticalInput.addEventListener('change', function() {
+            const temperatureCriticalValue = temperatureCriticalInput.value;
+            // Выполнить необходимые действия при изменении критической температуры
+        });
+        
+        cpuCriticalInput.addEventListener('change', function() {
+            const cpuCriticalValue = cpuCriticalInput.value;
+            // Выполнить необходимые действия при изменении критической нагрузки на CPU
+        });
+        
+        memoryCriticalInput.addEventListener('change', function() {
+            const memoryCriticalValue = memoryCriticalInput.value;
+            // Выполнить необходимые действия при изменении критической нагрузки на оперативную память
+        });
+    </script>
+</body>
+</html>
