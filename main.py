@@ -3,6 +3,7 @@ from flask import Flask, render_template, jsonify, request
 import sqlite3
 import psutil
 import datetime
+import pytz
 import smtplib
 from email.mime.text import MIMEText
 app = Flask(__name__)
@@ -33,7 +34,8 @@ def get_data():
     interval = request.args.get('interval', '1m')
     
     # Определение временного интервала, основываясь на выбранном значении
-    current_time = datetime.datetime.now()
+    moscow_tz = pytz.timezone('Europe/Moscow')
+    current_time =  datetime.datetime.now(tz=moscow_tz)
     if interval == '1m':
         start_time = current_time - datetime.timedelta(minutes=1)
     elif interval == '1h':
@@ -87,7 +89,7 @@ def save_server_stats():
     conn.commit()
     conn.close()
 def send_email(subject, message):
-    print("Отправлно письмо на почту")
+    print("Письмо отправлено")
     # Замените значения настройками вашей электронной почты
     sender_email = "vanya.chazov@internet.ru"
     sender_password = "Tjy5mH9sJDmgg2npf16U"
@@ -128,6 +130,7 @@ def setup():
     conn.close()
     save_server_stats()  # Сохранение данных перед каждым запросом
     # Получение актуальных значений из формы
+    print("аааа")
     check_thresholds(cpu_critical, temperature_critical, memory_critical)
 
 if __name__ == "__main__":
