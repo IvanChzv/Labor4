@@ -3,7 +3,6 @@ from flask import Flask, render_template, jsonify, request
 import sqlite3
 import psutil
 import datetime
-import pytz
 import smtplib
 from email.mime.text import MIMEText
 app = Flask(__name__)
@@ -34,8 +33,7 @@ def get_data():
     interval = request.args.get('interval', '1m')
     
     # Определение временного интервала, основываясь на выбранном значении
-    moscow_tz = pytz.timezone('Europe/Moscow')
-    current_time =  datetime.datetime.now(tz=moscow_tz)
+    current_time = datetime.datetime.now()
     if interval == '1m':
         start_time = current_time - datetime.timedelta(minutes=1)
     elif interval == '1h':
